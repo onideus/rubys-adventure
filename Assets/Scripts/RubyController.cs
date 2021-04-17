@@ -4,34 +4,44 @@ using UnityEngine;
 
 public class RubyController : MonoBehaviour
 {
-    public int maxHealth = 5;
-    private int currentHealth;
-    
-    private Rigidbody2D rigidbody2d;
-    private float horizontal;
-    private float vertical;
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        rigidbody2d = GetComponent<Rigidbody2D>();
+    public float speed = 3.0f;
 
-        currentHealth = maxHealth;
+    public int maxHealth = 5;
+    private int _currentHealth;
+
+    public int health => _currentHealth;
+
+    private Rigidbody2D _rigidbody2d;
+    private float _horizontal;
+    private float _vertical;
+
+    // Start is called before the first frame update
+    private void Start()
+    {
+        _rigidbody2d = GetComponent<Rigidbody2D>();
+
+        _currentHealth = 1;
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        vertical = Input.GetAxis("Vertical");
-        horizontal = Input.GetAxis("Horizontal");
+        _vertical = Input.GetAxis("Vertical");
+        _horizontal = Input.GetAxis("Horizontal");
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         Vector2 position = transform.position;
-        position.x = position.x + 3.0f * horizontal * Time.deltaTime;
-        position.y = position.y + 3.0f * vertical * Time.deltaTime;
+        position.x = position.x + speed * _horizontal * Time.deltaTime;
+        position.y = position.y + speed * _vertical * Time.deltaTime;
 
-        rigidbody2d.MovePosition(position);
+        _rigidbody2d.MovePosition(position);
+    }
+
+    public void ChangeHealth(int amount)
+    {
+        _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, maxHealth);
+        Debug.Log(_currentHealth + "/" + maxHealth);
     }
 }
