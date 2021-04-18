@@ -5,9 +5,11 @@ using UnityEngine;
 public class RubyController : MonoBehaviour
 {
     public float speed = 3.0f;
-
+    
     public int maxHealth = 5;
     public float timeInvincible = 2.0f;
+
+    public GameObject projectilePrefab;
     
     private int _currentHealth;
     public int health => _currentHealth;
@@ -48,6 +50,11 @@ public class RubyController : MonoBehaviour
         _animator.SetFloat("Look X", _lookDirection.x);
         _animator.SetFloat("Look Y", _lookDirection.y);
         _animator.SetFloat("Speed", _move.magnitude);
+        
+        if(Input.GetKeyDown(KeyCode.C)) 
+            Launch();
+
+        // invincibility check should come last for each update
 
         if (!_isInvincible) return;
         
@@ -78,5 +85,16 @@ public class RubyController : MonoBehaviour
         
         _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, maxHealth);
         Debug.Log(_currentHealth + "/" + maxHealth);
+    }
+
+    private void Launch()
+    {
+        GameObject projectileObject =
+            Instantiate(projectilePrefab, _rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity);
+
+        var projectile = projectileObject.GetComponent<Projectile>();
+        projectile.Launch(_lookDirection, 300);
+        
+        _animator.SetTrigger("Launch");
     }
 }

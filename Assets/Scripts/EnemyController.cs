@@ -13,6 +13,7 @@ public class EnemyController : MonoBehaviour
     private Animator _animator;
     private float _timer;
     private int _direction = 1;
+    private bool _broken = true;
 
     // Start is called before the first frame update
     private void Start()
@@ -24,6 +25,8 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
+        if (!_broken) return;
+
         _timer -= Time.deltaTime;
 
         if (_timer >= 0) return;
@@ -33,6 +36,8 @@ public class EnemyController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!_broken) return;
+        
         var position = _rigidbody2D.position;
 
         if (vertical)
@@ -57,5 +62,12 @@ public class EnemyController : MonoBehaviour
 
         if (player == null) return;
         player.ChangeHealth(-1);
+    }
+
+    public void Fix()
+    {
+        _broken = false;
+        _rigidbody2D.simulated = false;
+        _animator.SetTrigger("Fixed");
     }
 }
