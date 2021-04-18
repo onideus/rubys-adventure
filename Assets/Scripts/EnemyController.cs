@@ -10,6 +10,7 @@ public class EnemyController : MonoBehaviour
     public float changeTime = 3.0f;
 
     private Rigidbody2D _rigidbody2D;
+    private Animator _animator;
     private float _timer;
     private int _direction = 1;
 
@@ -17,6 +18,8 @@ public class EnemyController : MonoBehaviour
     private void Start()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        _timer = changeTime;
+        _animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -34,10 +37,14 @@ public class EnemyController : MonoBehaviour
 
         if (vertical)
         {
+            _animator.SetFloat("Move X", 0);
+            _animator.SetFloat("Move Y", _direction);
             position.y += Time.deltaTime * speed * _direction;
         }
         else
         {
+            _animator.SetFloat("Move X", _direction);
+            _animator.SetFloat("Move Y", 0);
             position.x += Time.deltaTime * speed * _direction;
         }
 

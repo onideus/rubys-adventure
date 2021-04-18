@@ -13,17 +13,21 @@ public class RubyController : MonoBehaviour
     public int health => _currentHealth;
 
     private bool _isInvincible;
-    private float invincibleTimer;
+    private float _invincibleTimer;
     
     private Rigidbody2D _rigidbody2d;
     private float _horizontal;
     private float _vertical;
+    private Vector2 _move;
+
+    private Animator _animator;
+    private Vector2 _lookDirection = new Vector2(1, 0);
 
     // Start is called before the first frame update
     private void Start()
     {
+        _animator = GetComponent<Animator>();
         _rigidbody2d = GetComponent<Rigidbody2D>();
-
         _currentHealth = maxHealth;
     }
 
@@ -33,18 +37,29 @@ public class RubyController : MonoBehaviour
         _vertical = Input.GetAxis("Vertical");
         _horizontal = Input.GetAxis("Horizontal");
 
+        _move = new Vector2(_horizontal, _vertical);
+
+        if (!Mathf.Approximately(_move.x, 0.0f) || !Mathf.Approximately(_move.y, 0.0f))
+        {
+            _lookDirection.Set(_move.x, _move.y);
+            _lookDirection.Normalize();
+        }
+        
+        _animator.SetFloat("Look X", _lookDirection.x);
+        _animator.SetFloat("Look Y", _lookDirection.y);
+        _animator.SetFloat("Speed", _move.magnitude);
+
         if (!_isInvincible) return;
         
-        invincibleTimer -= Time.deltaTime;
-        if (invincibleTimer < 0)
+        _invincibleTimer -= Time.deltaTime;
+        if (_invincibleTimer < 0)
             _isInvincible = false;
     }
 
     private void FixedUpdate()
     {
         Vector2 position = transform.position;
-        position.x = position.x + speed * _horizontal * Time.deltaTime;
-        position.y = position.y + speed * _vertical * Time.deltaTime;
+        position += _move * (speed * Time.deltaTime);
 
         _rigidbody2d.MovePosition(position);
     }
@@ -54,9 +69,11 @@ public class RubyController : MonoBehaviour
         if (amount < 0)
         {
             if (_isInvincible) return;
+            
+            _animator.SetTrigger("Hit");
 
             _isInvincible = true;
-            invincibleTimer = timeInvincible;
+            _invincibleTimer = timeInvincible;
         }
         
         _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, maxHealth);
