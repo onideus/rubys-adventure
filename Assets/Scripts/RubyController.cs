@@ -5,18 +5,18 @@ using UnityEngine;
 public class RubyController : MonoBehaviour
 {
     public float speed = 3.0f;
-    
+
     public int maxHealth = 5;
     public float timeInvincible = 2.0f;
 
     public GameObject projectilePrefab;
-    
+
     private int _currentHealth;
     public int health => _currentHealth;
 
     private bool _isInvincible;
     private float _invincibleTimer;
-    
+
     private Rigidbody2D _rigidbody2d;
     private float _horizontal;
     private float _vertical;
@@ -25,12 +25,17 @@ public class RubyController : MonoBehaviour
     private Animator _animator;
     private Vector2 _lookDirection = new Vector2(1, 0);
 
+    private AudioSource _audioSource;
+    public AudioClip thrownWeapon;
+    public AudioClip damageTaken;
+
     // Start is called before the first frame update
     private void Start()
     {
         _animator = GetComponent<Animator>();
         _rigidbody2d = GetComponent<Rigidbody2D>();
         _currentHealth = maxHealth;
+        _audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -46,18 +51,31 @@ public class RubyController : MonoBehaviour
             _lookDirection.Set(_move.x, _move.y);
             _lookDirection.Normalize();
         }
-        
+
         _animator.SetFloat("Look X", _lookDirection.x);
         _animator.SetFloat("Look Y", _lookDirection.y);
         _animator.SetFloat("Speed", _move.magnitude);
-        
-        if(Input.GetKeyDown(KeyCode.C)) 
+
+        if (Input.GetKeyDown(KeyCode.C))
             Launch();
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            var hit = Physics2D.Raycast(_rigidbody2d.position + Vector2.up * 0.2f, _lookDirection, 1.5f,
+                LayerMask.GetMask("NPC"));
+
+            if (hit.collider != null)
+            {
+                var npc = hit.collider.GetComponent<NonPlayerCharacter>();
+                if (npc == null) return;
+                npc.DisplayDialog();
+            }
+        }
 
         // invincibility check should come last for each update
 
         if (!_isInvincible) return;
-        
+
         _invincibleTimer -= Time.deltaTime;
         if (_invincibleTimer < 0)
             _isInvincible = false;
@@ -76,25 +94,32 @@ public class RubyController : MonoBehaviour
         if (amount < 0)
         {
             if (_isInvincible) return;
-            
+
             _animator.SetTrigger("Hit");
 
             _isInvincible = true;
             _invincibleTimer = timeInvincible;
         }
-        
+
         _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, maxHealth);
         UIHealthBar.instance.SetValue(_currentHealth / (float) maxHealth);
+        PlaySound(damageTaken);
     }
 
     private void Launch()
     {
-        GameObject projectileObject =
+        var projectileObject =
             Instantiate(projectilePrefab, _rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity);
 
         var projectile = projectileObject.GetComponent<Projectile>();
         projectile.Launch(_lookDirection, 300);
         
         _animator.SetTrigger("Launch");
+        PlaySound(thrownWeapon);
+    }
+
+    public void PlaySound(AudioClip audioClip)
+    {
+        _audioSource.PlayOneShot(audioClip);
     }
 }
