@@ -6,14 +6,15 @@ about the tutorial can be found at [here](https://learn.unity.com/project/ruby-s
 ### Summary
 
 Project Objective
-You will learn:
+
+**You will learn:**
 - How to use and customise the Editor
 - How to manage your project resources and scenes throughout development
 - How to create a character and controller
 - World layout and design using tilemaps
 - How to adapt static sprites to animated sprites
 
-World interactions for:
+**World interactions for:**
 - Blocking character movement
 - Picking up collectibles
 - Damaging the character
